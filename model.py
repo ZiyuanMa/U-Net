@@ -39,7 +39,7 @@ class Network(nn.Module):
         super().__init__()
 
         self.conv1 = nn.Sequential(
-            nn.Conv2d(1, 64, 3, 1, 1),
+            nn.Conv2d(3, 64, 3, 1, 1),
             nn.ReLU(True),
             RRC_block(64),
         )
@@ -98,7 +98,7 @@ class Network(nn.Module):
             nn.Conv2d(128, 64, 3, 1, 1),
             nn.ReLU(True),
             RRC_block(64),
-            nn.Conv2d(64, 2, 1),
+            nn.Conv2d(64, 1, 1),
         )
 
     def forward(self, x):
@@ -109,10 +109,10 @@ class Network(nn.Module):
         x4 = self.conv4(x3)
 
         x = self.trans_conv(x4)
-        x = self.up_conv1(torch.cat((x, x4)))
-        x = self.up_conv2(torch.cat((x, x3)))
-        x = self.up_conv3(torch.cat((x, x2)))
-        x = self.final_conv(torch.cat((x, x1)))
+        x = self.up_conv1(torch.cat((x, x4), dim=1))
+        x = self.up_conv2(torch.cat((x, x3), dim=1))
+        x = self.up_conv3(torch.cat((x, x2), dim=1))
+        x = self.final_conv(torch.cat((x, x1), dim=1))
         
         return x
 
