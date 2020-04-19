@@ -3,15 +3,16 @@ import torch.nn as nn
 from model import Network
 import torchvision
 from PIL import Image
-import matplotlib.pyplot as plt
 import os
 import numpy as np
 import random
 from tqdm import tqdm
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, datasets, models
+from torchvision import transforms, datasets
+import matplotlib.pyplot as plt
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
+# random image transformation to do image augmentation
 trans = transforms.Compose([
     transforms.ToPILImage(),
     transforms.RandomRotation(90), 
@@ -55,7 +56,6 @@ class UNetDataset(Dataset):
 
     def __getitem__(self, idx):
         
-
         # seed so image and target have the same random tranform
         seed = random.randint(0,2**32)
 
@@ -76,13 +76,17 @@ class UNetDataset(Dataset):
 
 class model:
     def __init__(self, data_path):
-        self.network = Network().to(device)
         self.data_path = data_path
+        
+        self.network = Network()
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=1e-4)
         self.loss_fn = nn.BCELoss()
+
+        # training iteration
         self.epoch = 50
 
     def train(self):
+        self.network.to(device)
         training_set = UNetDataset(os.path.join(self.data_path, 'training'), trans)
         training_loader = DataLoader(training_set, batch_size=24, shuffle=True)
         for i in range(self.epoch):
@@ -109,30 +113,36 @@ class model:
     #     img = torch.from_numpy(img).to(device)
     #     predict = self.network(img)
 
-    #     plt.imshow(predict.permute(1,2,0))
     
     def test(self):
-        self.network.load_state_dict(torch.load('./model.pth'))
+        '''
+        run test set
+        '''
+        # load saved model
         self.network.to('cpu')
+        self.network.load_state_dict(torch.load('./model.pth', map_location=torch.device('cpu')))
         self.network.eval()
 
-        self.imgs_path = list(sorted(os.listdir(os.path.join(self.data_path, "/testing/images"))))
-        self.targets_path = list(sorted(os.listdir(os.path.join(self.data_path, "/testing/1st_manual"))))
+        # load test set
+        self.imgs_path = list(sorted(os.listdir(os.path.join(self.data_path, "testing/images"))))
+        self.targets_path = list(sorted(os.listdir(os.path.join(self.data_path, "testing/1st_manual"))))
         
         ac_list = []
         with torch.no_grad():
-            for img_path, target_path in zip(self.imgs_path, self.targets_path):
+            for img_name, target_name in zip(self.imgs_path, self.targets_path):
+                img_path = os.path.join(self.data_path, "testing/images", img_name)
                 img = Image.open(img_path)
                 img = transforms.functional.center_crop(img, 560)
-                img = transforms.functional.to_tensor(img)
+                img = transforms.functional.to_tensor(img).unsqueeze(0)
 
+                target_path = os.path.join(self.data_path, "testing/1st_manual", target_name)
                 target = Image.open(target_path)
                 target = transforms.functional.center_crop(target, 560)
                 target = np.array(target)
 
                 predict = self.network(img)
-                predict = predict.numpy()
-                predict = predict>=0.5
+                predict = np.squeeze(predict.numpy(), axis=(0,1))
+                predict = (predict>=0.5).astype(np.uint8)
 
                 TP = np.sum(np.logical_and(predict == 1, target == 1))
                 TN = np.sum(np.logical_and(predict == 0, target == 0))
@@ -140,7 +150,12 @@ class model:
                 # FN = np.sum(np.logical_and(predict == 0, target == 1))
                 AC = (TP+TN)/(560*560)
                 ac_list.append(AC)
+
                 # print(AC)
+
+                # show predicted image
+                # plt.imshow(predict, cmap="gray")
+                # plt.show()
 
         print('accuracy: %.4f' %(sum(ac_list)/20))
 
@@ -149,4 +164,4 @@ if __name__ == '__main__':
 
     m = model('./DRIVE')
     m.train()
-    # m.predict()
+    m.test()
