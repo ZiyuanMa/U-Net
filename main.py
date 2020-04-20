@@ -137,7 +137,7 @@ class model:
                 loss.backward()
                 self.optimizer.step()
 
-            sum_loss /= 178
+            sum_loss /= 184
             print('loss: {}'.format(sum_loss))
 
             if i % 10 == 0:
@@ -153,26 +153,32 @@ class model:
     #     predict = self.network(img)
 
     
-    def test(self):
+    def test(self, show=False):
         '''
         run test set
         '''
         # load saved model
         self.network.to('cpu')
-        self.network.load_state_dict(torch.load('./model95.pth', map_location=torch.device('cpu')))
+        self.network.load_state_dict(torch.load('./model.pth', map_location=torch.device('cpu')))
         self.network.eval()
 
         # load test set
         self.imgs_path = list(sorted(os.listdir(os.path.join(self.data_path, "testing/images"))))
+        self.masks_path = list(sorted(os.listdir(os.path.join(self.data_path, "testing/mask"))))
         self.targets_path = list(sorted(os.listdir(os.path.join(self.data_path, "testing/1st_manual"))))
         
         ac_list = []
         with torch.no_grad():
-            for img_name, target_name in zip(self.imgs_path, self.targets_path):
+            for img_name, mask_name, target_name in zip(self.imgs_path, self.masks_path, self.targets_path):
                 img_path = os.path.join(self.data_path, "testing/images", img_name)
                 img = Image.open(img_path)
                 img = transforms.functional.center_crop(img, 560)
                 img = transforms.functional.to_tensor(img).unsqueeze(0)
+
+                mask_path = os.path.join(self.data_path, "testing/mask", mask_name)
+                mask = Image.open(mask_path)
+                mask = transforms.functional.center_crop(mask, 560)
+                mask = np.array(mask)
 
                 target_path = os.path.join(self.data_path, "testing/1st_manual", target_name)
                 target = Image.open(target_path)
@@ -182,6 +188,8 @@ class model:
                 predict = self.network(img)
                 predict = np.squeeze(predict.numpy(), axis=(0,1))
                 predict = (predict>=0.5).astype(np.uint8)
+
+                predict = predict * mask
 
                 TP = np.sum(np.logical_and(predict == 1, target == 1))
                 TN = np.sum(np.logical_and(predict == 0, target == 0))
@@ -193,14 +201,15 @@ class model:
                 # print(AC)
 
                 # show predicted image
-                fig = plt.figure()
-                ax1 = fig.add_subplot(1,2,1)
-                ax1.imshow(predict, cmap="gray")
-                ax2 = fig.add_subplot(1,2,2)
-                ax2.imshow(target, cmap="gray")
-                # plt.imshow(predict, cmap="gray")
-                # plt.imshow(target, cmap="gray")
-                plt.show()
+                if show:
+                    fig = plt.figure()
+                    ax1 = fig.add_subplot(1,3,1)
+                    ax1.imshow(img.squeeze(0).permute((1,2,0)))
+                    ax2 = fig.add_subplot(1,3,2)
+                    ax2.imshow(predict, cmap="gray")
+                    ax3 = fig.add_subplot(1,3,3)
+                    ax3.imshow(target, cmap="gray")
+                    plt.show()
 
         print('accuracy: %.4f' %(sum(ac_list)/20))
 
@@ -208,5 +217,5 @@ class model:
 if __name__ == '__main__':
 
     m = model('./DRIVE')
-    m.train()
-    # m.test()
+    # m.train()
+    m.test(True)
