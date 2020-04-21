@@ -263,7 +263,7 @@ if __name__ == '__main__':
     # training setting
     parser.add_argument('--epoch', type=int, default=45, help='training epoch')
     # testing setting
-    parser.add_argument('--show', type=bool, default=True, help='if show the predicted image')
+    parser.add_argument('--show', type=str, default='True', help='if show the predicted image')
 
     args = parser.parse_args()
 
@@ -271,4 +271,7 @@ if __name__ == '__main__':
     if args.mode == 'train':
         m.train(args.epoch)
     else:
-        m.test(args.show)
+        if args.show == 'True':
+            m.test(True)
+        else:
+            m.test(False)
