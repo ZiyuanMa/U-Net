@@ -25,12 +25,10 @@ trans_fn1 = transforms.Compose([
 # random image transformation to do image augmentation
 trans_fn2 = transforms.Compose([
     transforms.ToPILImage(),
-    # transforms.RandomRotation(90),
     transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.ToTensor(),
-    # transforms.Lambda(lambda x: x/255)
 ])
 
 class UNetDataset(Dataset):
@@ -118,12 +116,14 @@ class model:
     def __init__(self, model):
         
         self.model = model
+
         if self.model == 'U-Net':
             self.network = UNet()
         elif self.model == 'R2U-Net':
             self.network = R2UNet()
         elif self.model == 'IterNet':
             self.network = IterNet()
+            
     def train(self, epoch):
         self.network.to(device)
         self.network.train()
