@@ -249,11 +249,11 @@ class model:
 
         F1, SE, SP, AC, AUC = map(list, zip(*results))
 
-        print('accuracy: %.4f' %(sum(F1)/len(F1)))
+        print('F1 score: %.4f' %(sum(F1)/len(F1)))
         print('sensitivity: %.4f' %(sum(SE)/len(SE)))
         print('specificity: %.4f' %(sum(SP)/len(SP)))
-        print('Dice coefficient: %.4f' %(sum(AC)/len(AC)))
-        print('Jaccard similarity: %.4f' %(sum(AUC)/len(AUC)))
+        print('accuracy: %.4f' %(sum(AC)/len(AC)))
+        print('AUC: %.4f' %(sum(AUC)/len(AUC)))
 
 
 if __name__ == '__main__':
