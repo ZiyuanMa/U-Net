@@ -1,5 +1,13 @@
 # U-Net, R2U-Net and IterNet for Retinal image segmentation
 
+## requirements
+
+use
+~~~
+pip install -r requirements.txt
+~~~
+to install all required packages
+
 ## test
 
 Test mode will run the model on test set of DRIVE dataset.
