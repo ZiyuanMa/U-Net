@@ -214,6 +214,8 @@ class model:
                 target_ = target_[mask==1]
 
                 predict = self.network(img)
+                if self.model == 'IterNet':
+                    predict = predict[-1]
                 predict = np.squeeze(predict.numpy(), axis=(0,1))
                 predict_ = predict.flatten()[mask==1]
                 predict_ = (predict_>=0.5).astype(np.uint8)
