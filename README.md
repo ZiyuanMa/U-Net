@@ -1,22 +1,24 @@
 # U-Net, R2U-Net and IterNet for Retinal image segmentation
 
-## requirements
+## Introduction
 
-use
+PyTorch implementation of [U-Net](https://arxiv.org/abs/1505.04597), [R2U-Net](https://arxiv.org/pdf/1802.06955.pdf) and [IterNet](https://arxiv.org/abs/1912.05763). Running on DRIVE dataset.
+
+
+## Train
 ~~~
-pip install -r requirements.txt
+python3 main.py --model MODEL_NAME --epoch NUM_EPOCHS
 ~~~
-to install all required packages
 
-## test
 
-Test mode will run the model on test set of DRIVE dataset.
+## Test
 
-Before get started, download pre-trained model from: https://drive.google.com/drive/folders/1AxaeHDFN-X8EDN38znEysthh2tSdD_0u?usp=sharing 
+
+You can also download pre-trained model from: https://drive.google.com/drive/folders/1AxaeHDFN-X8EDN38znEysthh2tSdD_0u?usp=sharing 
 
 command:
 ~~~
-python3 main.py --model MODEL_NAME --show T_OR_F
+python3 main.py --model MODEL_NAME --mode test --show T_OR_F
 ~~~
 
 '--model' refers to the model's name which includes 'U-Net', 'R2U-Net' and 'IterNet'.

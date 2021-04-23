@@ -261,7 +261,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='U-Net')
     # general setting
     parser.add_argument('--model', type=str, default='U-Net', help='U-Net R2U-Net IterNet')
-    parser.add_argument('--mode', type=str, default='test', help='train test')
+    parser.add_argument('--mode', type=str, default='train', help='train test')
     # training setting
     parser.add_argument('--epoch', type=int, default=45, help='training epoch')
     # testing setting
